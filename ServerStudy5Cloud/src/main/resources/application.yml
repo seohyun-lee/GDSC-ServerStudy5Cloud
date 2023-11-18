@@ -1,9 +1,15 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+# 이렇게 .env 파일을 사용하려고 했지만 잘 동작하지 않아서... 빌드 Edit Configuration에서 Environment variables로 설정해서 했습니다...!
 cloud:
   aws:
     s3:
-      bucket: # [Bucket-Name]
+      bucket: ${S3_BUCKET}
     stack.auto: false
     region.static: ap-northeast-2
     credentials:
-      access-key: # [Access-Key]
-      secret-key: # [Secret-key]
+      access-key: ${CREDENTIALS_ACCESS_KEY}
+      secret-key: ${CREDENTIALS_SECRET_KEY}
+server:
+  port: 8080

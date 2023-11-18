@@ -28,15 +28,26 @@ public class S3Controller {
 
     @GetMapping("/")
     public String listFiles(Model model) {
-        //getUrl로 객체 URL 가져온 후, List<String>에 넣어 index.html에 반환하기
+        // S3 버킷의 객체 목록 가져오기
+        List<S3ObjectSummary> objectSummaries = amazonS3.listObjectsV2(bucketName).getObjectSummaries();
+        // getUrl로 객체 URL 가져온 후, List<String>에 넣어 index.html에 반환
+        List<String> fileUrls = new ArrayList<>();
+        for (S3ObjectSummary os : objectSummaries) {
+            String url = amazonS3.getUrl(bucketName, os.getKey()).toString();
+            fileUrls.add(url);
+        }
+        model.addAttribute("fileUrls", fileUrls);
         return "index";
     }
 
     @PostMapping("/upload")
-    public String uploadFile(@RequestParam("file") MultipartFile file) {
-
-        //putObject와 setObjectAcl로 이미지 업로드하고 ACL 퍼블릭으로 만들기
+    public String uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
+        String filename = file.getOriginalFilename();
+        // putObject로 파일을 S3 버킷에 업로드
+        amazonS3.putObject(bucketName, filename, file.getInputStream(), null);
+        // ACL 퍼블릭으로 설정
+        amazonS3.setObjectAcl(bucketName, filename, CannedAccessControlList.PublicRead);
         return "redirect:/";
-
     }
 }
+// 동작 영상 : https://drive.google.com/file/d/10wPjsBbnbIR5E6pKbwmr2sZ-GsLY-FWP/view?usp=sharing
